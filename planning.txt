@@ -1,0 +1,9 @@
+1) Fetch JSONS - download json files w/ vaccine information from vaccinespotter
+   or COVIDWA
+2) Update users - read google form and update w/ new users and new people
+   who have unsubscribed
+3) Create notification list - use new JSON to find zip codes that should be
+   notified
+4) Send alerts - create and send notification emails
+5) Runner - some process that runs the different scripts in parallel and
+            periodically
