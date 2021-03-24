@@ -48,6 +48,11 @@ class fetch_vaccine_spotter():
                 avail_loc["coordinates"] = loc["geometry"]["coordinates"]
                 avail_loc["zip"] = loc["properties"]["postal_code"]
                 avail_loc["url"] = loc["properties"]["url"]
+                avail_loc["name"] = "{} {} {}".format(
+                    loc["properties"]["name"],
+                    loc["properties"]["city"],
+                    loc["properties"]["address"]
+                )
 
                 # try to fill in coordinates if they're not available
                 avail_loc = fill_coordinates(avail_loc)

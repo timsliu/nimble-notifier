@@ -26,7 +26,8 @@ def format_msg(user):
     avail_locs = ""
 
     for loc in locations:
-        avail_locs += "\nZip code: {}\n".format(loc['zip'])
+        avail_locs += "\nLocation: {}\n".format(loc['name'])
+        avail_locs += "Zip code: {}\n".format(loc['zip'])
         avail_locs += "{}\n".format(loc["url"])
         avail_locs += "Estimated distance: {:.1f} miles\n".format(loc["distance"])
 
