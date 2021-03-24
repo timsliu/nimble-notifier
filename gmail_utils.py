@@ -20,58 +20,11 @@ import html2text
 import pickle
 import email
 
-from defs import *
 
 # If modifying these scopes, delete the file data/credentials/token_gmail.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.compose',
           'https://www.googleapis.com/auth/gmail.readonly',
           'https://www.googleapis.com/auth/drive.activity']
-
-
-def DownloadFile():
-    file_id = '1ZdR3L3qP4Bkq8noWLJHSr_iBau0DNT4Kli4SxNc2YEo'
-    request = drive_service.files().export_media(fileId=file_id,
-                                                 mimeType='application/pdf')
-    fh = io.BytesIO()
-    downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while done is False:
-        status, done = downloader.next_chunk()
-        print("Download %d%%." % int(status.progress() * 100))
-
-
-def ListMessagesMatchingQuery(service, user_id, query=QUERY_STR):
-  """List all Messages of the user's mailbox matching the query.
-
-  Args:
-    service: Authorized Gmail API service instance.
-    user_id: User's email address. The special value "me"
-    can be used to indicate the authenticated user.
-    query: String used to filter messages returned.
-    Eg.- 'from:user@some_domain.com' for Messages from a particular sender.
-
-  Returns:
-    List of Messages that match the criteria of the query. Note that the
-    returned list contains Message IDs, you must use get with the
-    appropriate ID to get the details of a Message.
-  """
-  try:
-    response = service.users().messages().list(userId=user_id,
-                                               q=query).execute()
-    messages = []
-    if 'messages' in response:
-      messages.extend(response['messages'])
-
-    while 'nextPageToken' in response:
-      page_token = response['nextPageToken']
-      response = service.users().messages().list(userId=user_id, q=query,
-                                         pageToken=page_token).execute()
-      messages.extend(response['messages'])
-
-    return messages
-  except errors.HttpError as  error:
-    print("User ID: {}".format(user_id))
-    print('An error occurred: %s' % error)
 
 
 def GetService():
@@ -246,3 +199,25 @@ def create_draft(service, user_id, message_body):
     except errors.HttpError as error:
         print('An error occurred: %s' % error)
         return None
+
+
+
+
+def send_message(service, user_id, message):
+  """Send an email message.
+
+  Args:
+    service: Authorized Gmail API service instance.
+    user_id: User's email address. The special value "me"
+    can be used to indicate the authenticated user.
+    message: Message to be sent.
+
+  Returns:
+    Sent Message.
+  """
+  try:
+    message = (service.users().messages().send(userId=user_id, body=message)
+               .execute())
+    return message
+  except errors.HttpError as error:
+    print('An error occurred: %s' % error)
