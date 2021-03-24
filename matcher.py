@@ -57,7 +57,7 @@ def match_all():
         with open(state_loc, "r") as f:
             loc_data = json.load(f)
     
-        all_matches.append(match_state(user_data, loc_data))
+        all_matches += match_state(user_data, loc_data)
 
     return all_matches
 

@@ -66,5 +66,5 @@ class fetch_vaccine_spotter():
 
 if __name__ == "__main__":
     vaccine_spotter = fetch_vaccine_spotter()
-    print(vaccine_spotter.fetch())
+    vaccine_spotter.fetch()
         
