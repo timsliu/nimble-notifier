@@ -110,5 +110,32 @@ def add_users(user_list):
         with open(state_json_path, "w") as f:
             f.write(state_data)
 
-def remove_users():
-    pass
+def remove_users(user_list):
+    '''remove a list of users from the user json'''
+
+    for user in user_list:
+        email_address = user[1]
+        state = user[2]
+        state_json_path = "data/user/{}_users.json".format(state)
+
+        # open the json file of users
+        with open(state_json_path, "r") as f:
+            state_list = json.load(f)
+
+        # search for the user
+        user_index = None
+        for i, entry in enumerate(state_list):
+            if entry["email"] == email_address:
+                user_index = i
+                break
+
+        # delete the user
+        if user_index is not None:
+            del state_list[user_index]
+
+        # dump the updated json back
+        state_data = json.dumps(state_list, indent = 4)
+        with open(state_json_path, "w") as f:
+            f.write(state_data)
+
+        return
