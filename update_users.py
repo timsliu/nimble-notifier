@@ -28,7 +28,6 @@ def new_users(drive_service):
     values.reverse()   # reverse to parse latest first
     last_new = None 
     for i, row in enumerate(values):
-        print(values) 
         if row[0] == "Timestamp":
             last_new = i 
             break
@@ -45,7 +44,6 @@ def new_users(drive_service):
 def add_users(user_list):
     '''add new users to the appropriate JSON'''
 
-    #print(user_list)
     # TODO - sort by state and only open when the state changes
 
     for row in user_list:

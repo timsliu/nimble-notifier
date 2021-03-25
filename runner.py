@@ -36,11 +36,15 @@ def run_test():
 def run_all():
     '''run all processes and continually loop''' 
     
-    gmail_service = gmail_utils.GetService()                         # get gmail service
-    vaccine_spotter = fetch_data.fetch_vaccine_spotter()             # update vaccine data
+    gmail_service = gmail_utils.GetService()                   # get gmail service
+    drive_service = drive_utils.GetSheetService()              # get drive service
+    vaccine_spotter = fetch_data.fetch_vaccine_spotter()       # update vaccine data
     
     while True:
         try:
+            new_users = update_users.new_users(drive_service)  # update user list
+            update_users.add_users(new_users)
+            
             vaccine_spotter.fetch()                                      # update vaccine data
             match_list = matcher.match_all()                             # match users w/ nearby vaccines
             sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
@@ -56,5 +60,5 @@ def run_all():
         time.sleep(defs.TICK_TIME)
 
 if __name__ == "__main__":
-    #run_all()
-    run_test()
+    run_all()
+    #run_test()
