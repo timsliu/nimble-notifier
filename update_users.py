@@ -21,7 +21,7 @@ def all_states():
 
     return states
 
-def new_users(drive_service):
+def new_entries(drive_service, sheet_name):
     '''read from the google spreadsheet and find new users'''
     # get last update time 
     last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + 1)) 
@@ -31,12 +31,19 @@ def new_users(drive_service):
     with open("data/credentials/doc_ids.json", "r") as f:
         doc_ids = json.load(f)
 
-    # access sheet with new users
-    new_user_sheet = doc_ids["new_user_sheet"]
-    sheet = drive_service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=new_user_sheet, range=RANGE).execute()
-    values = result.get('values', [])
+    # look up sheet id and sheet range
+    sheet_id = doc_ids[sheet_name]["sheet_id"]
+    sheet_range = doc_ids[sheet_name]["sheet_range"]
     
+    # access sheet 
+    sheets = drive_service.spreadsheets()
+    result = sheets.values().get(
+        spreadsheetId=sheet_id, 
+        range=sheet_range
+    ).execute()
+    values = result.get('values', [])
+   
+    # filter out only the newest entries since the last tick
     values.reverse()   # reverse to parse latest first
     last_new = None 
     for i, row in enumerate(values):
@@ -52,6 +59,7 @@ def new_users(drive_service):
             break
 
     return values[0:last_new]
+
 
 def add_users(user_list):
     '''add new users to the appropriate JSON'''
