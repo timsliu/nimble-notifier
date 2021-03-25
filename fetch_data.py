@@ -23,51 +23,52 @@ def fill_coordinates(avail_loc):
 
     return avail_loc
 
-class fetch_vaccine_spotter():
+def fetch_state(state):
+    '''fetch the data for a single state'''
+    # data for API call 
+    api_url = 'https://www.vaccinespotter.org/api/v0/states/{}.json'.format(state)
+    headers = {
+        'if-modified-since': "<DATE_STRING>"
+    }
 
-    def __init__(self):
-        self.api_url = 'https://www.vaccinespotter.org/api/v0/states/CA.json'
-        self.headers = {
-            'if-modified-since': "<DATE_STRING>"
-        }
+    # get time and fill in the header
+    now = datetime.utcnow()
+    time_string = now.strftime("%a, %d %B %Y %H:%M:%S GMT")
+    headers['if-modified-since'] = time_string
 
-    def fetch(self):
-        now = datetime.utcnow()
-        time_string = now.strftime("%a, %d %B %Y %H:%M:%S GMT")
-        available = []
+    # make request
+    r = requests.get(api_url, headers=headers)
+    locations = r.json()
+    available = []
+    
+    for loc in locations["features"]:
+        # appointments are available 
+        if loc["properties"]["appointments_available"]:
+            # copy over relevant information 
+            avail_loc = {}
+            avail_loc["coordinates"] = loc["geometry"]["coordinates"]
+            avail_loc["zip"] = loc["properties"]["postal_code"]
+            avail_loc["url"] = loc["properties"]["url"]
+            avail_loc["name"] = "{} {} {}".format(
+                loc["properties"]["name"],
+                loc["properties"]["city"],
+                loc["properties"]["address"]
+            )
 
-        self.headers['if-modified-since'] = time_string
+            # try to fill in coordinates if they're not available
+            avail_loc = fill_coordinates(avail_loc)
+            
+            # add to full list only if there are coordinates
+            if avail_loc["coordinates"][0] is not None:
+                available.append(avail_loc)
+    
+    
+    # convert to json and dump it 
+    json_object = json.dumps(available, indent = 4)
+    with open("data/location/{}_location.json".format(state), "w") as f:
+        f.write(json_object)
 
-        r = requests.get(self.api_url, headers=self.headers)
-        locations = r.json()
-        for loc in locations["features"]:
-            # appointments are available 
-            if loc["properties"]["appointments_available"]:
-                # copy over relevant information 
-                avail_loc = {}
-                avail_loc["coordinates"] = loc["geometry"]["coordinates"]
-                avail_loc["zip"] = loc["properties"]["postal_code"]
-                avail_loc["url"] = loc["properties"]["url"]
-                avail_loc["name"] = "{} {} {}".format(
-                    loc["properties"]["name"],
-                    loc["properties"]["city"],
-                    loc["properties"]["address"]
-                )
-
-                # try to fill in coordinates if they're not available
-                avail_loc = fill_coordinates(avail_loc)
-                
-                # add to full list only if there are coordinates
-                if avail_loc["coordinates"][0] is not None:
-                    available.append(avail_loc)
-       
-        
-        # convert to json and dump it 
-        json_object = json.dumps(available, indent = 4)
-        with open("data/location/CA_location.json", "w") as f:
-            f.write(json_object)
-
-        return available
+    return available
 
 if __name__ == "__main__":
     vaccine_spotter = fetch_vaccine_spotter()

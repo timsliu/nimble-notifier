@@ -6,8 +6,20 @@ import drive_utils
 import datetime as dt
 import defs
 import json
+import os
 
 RANGE = "Responses!A:E"
+
+def all_states():
+    '''create list of all states that there are users'''
+    user_files = os.listdir(os.path.join(os.getcwd(), "data/user"))
+    user_files = filter(lambda x: "_users.json" in x, user_files)
+    states = []
+
+    for state in user_files:
+        states.append(state[0:2])
+
+    return states
 
 def new_users(drive_service):
     '''read from the google spreadsheet and find new users'''

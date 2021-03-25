@@ -38,14 +38,17 @@ def run_all():
     
     gmail_service = gmail_utils.GetService()                   # get gmail service
     drive_service = drive_utils.GetSheetService()              # get drive service
-    vaccine_spotter = fetch_data.fetch_vaccine_spotter()       # update vaccine data
     
     while True:
         try:
             new_users = update_users.new_users(drive_service)  # update user list
             update_users.add_users(new_users)
+            user_states = update_users.all_states()            # get list of states 
+
+            # update all states with users
+            for state in user_states:
+                fetch_data.fetch_state(state)                       # update vaccine data
             
-            vaccine_spotter.fetch()                                      # update vaccine data
             match_list = matcher.match_all()                             # match users w/ nearby vaccines
             sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
             now = datetime.now() 
