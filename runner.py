@@ -7,10 +7,12 @@ import matcher
 import fetch_data
 import notifier
 import gmail_utils
+import drive_utils
 import time
 from datetime import datetime
+import defs
+import update_users
 
-SLEEP_TIME = 200      # sleep time in seconds
 
 
 def run_test():
@@ -18,11 +20,15 @@ def run_test():
     for matches, and emails users'''
     
     gmail_service = gmail_utils.GetService()                     # get gmail service
+    drive_service = drive_utils.GetSheetService()                # get drive service
 
-    vaccine_spotter = fetch_data.fetch_vaccine_spotter()         # update vaccine data
-    vaccine_spotter.fetch()                                      # update vaccine data
-    match_list = matcher.match_all()                             # match users w/ nearby vaccines
-    sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
+    new_users = update_users.new_users(drive_service)
+    update_users.add_users(new_users)
+
+    #vaccine_spotter = fetch_data.fetch_vaccine_spotter()         # update vaccine data
+    #vaccine_spotter.fetch()                                      # update vaccine data
+    #match_list = matcher.match_all()                             # match users w/ nearby vaccines
+    #sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
     
     print("Sucessfully sent {} out of {} attempted emails".format(sent, failed + sent))
 
@@ -47,7 +53,8 @@ def run_all():
         except BaseException as e:
             print("Failed: {}".format(e))
         
-        time.sleep(SLEEP_TIME)
+        time.sleep(defs.TICK_TIME)
 
 if __name__ == "__main__":
-    run_all()
+    #run_all()
+    run_test()
