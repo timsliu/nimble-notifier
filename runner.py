@@ -44,11 +44,10 @@ def run_single(gmail_service, drive_service):
     
     match_list = matcher.match_all()                             # match users w/ nearby vaccines
     sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
-    now = datetime.now() 
-    print("Sent {} out of {} attempted emails at {}".format(
+    print("Tick ending; sent {} out of {} attempted emails at {}".format(
         sent, 
         failed + sent, 
-        now.strftime("%d/%m/%Y %H:%M:%S")
+        datetime.now().strftime("%m/%d/%Y %H:%M:%S")
     ))
 
 
@@ -56,6 +55,9 @@ def run_continuous(gmail_service, drive_service):
     '''run all processes and continually loop''' 
     
     while True:
+        print("\n=== Starting tick at time: {} ===".format(
+            datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        ))
         try:
             run_single(gmail_service, drive_service) 
             time.sleep(defs.TICK_TIME)

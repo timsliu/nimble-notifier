@@ -71,16 +71,17 @@ def add_users(user_list):
         state_json_path = "data/user/{}_users.json".format(state)
        
         # load state data if it exists; otherwise use empty list
-        state_list = None
+        state_dict = None
         if os.path.exists(state_json_path):
             with open(state_json_path, "r") as f:
-                state_list = json.load(f)
+                state_dict = json.load(f)
         else:
-            state_list = []
+            state_dict = {}
         
         # create a new user dictionary
         new_user = {}
-        new_user["email"] = row[1]
+        email_address = row[1]
+        print("Adding/updating user: {}, {}".format(email_address, state))
        
         # reject zip codes and search radii that are not integers
         try:
@@ -91,22 +92,10 @@ def add_users(user_list):
             new_user["search_radius"] = 0
 
         new_user["last_avail"] = []
-
-        # see if this new user is in the dictionary
-        existing_index = None
-        for i, entry in enumerate(state_list):
-            if entry["email"] == new_user["email"]:
-                existing_index = i
-                break
-        
-        # delete old entry
-        if existing_index is not None:
-            del state_list[existing_index]
-
-        state_list.append(new_user)     # add new user
+        state_dict[email_address] = new_user
 
         # dump the updated json back
-        state_data = json.dumps(state_list, indent = 4)
+        state_data = json.dumps(state_dict, indent = 4)
         with open(state_json_path, "w") as f:
             f.write(state_data)
 
@@ -118,24 +107,17 @@ def remove_users(user_list):
         state = user[2]
         state_json_path = "data/user/{}_users.json".format(state)
 
+        print("Removing user: {}, {}".format(email_address, state))
         # open the json file of users
         with open(state_json_path, "r") as f:
-            state_list = json.load(f)
-
-        # search for the user
-        user_index = None
-        for i, entry in enumerate(state_list):
-            if entry["email"] == email_address:
-                user_index = i
-                break
-
-        # delete the user
-        if user_index is not None:
-            del state_list[user_index]
+            state_dict = json.load(f)
+        
+        # delete the user from the dictionary
+        state_dict.pop(email_address, None)
 
         # dump the updated json back
-        state_data = json.dumps(state_list, indent = 4)
+        state_data = json.dumps(state_dict, indent = 4)
         with open(state_json_path, "w") as f:
             f.write(state_data)
 
-        return
+    return

@@ -15,15 +15,15 @@ def match_state(user_data, loc_data):
     output: list of users with nearby locations'''
     match_list = []
 
-    for user in user_data:
-        user_coor = util.zip_to_coors(user["zip"])
+    for user in user_data.keys():
+        user_coor = util.zip_to_coors(user_data[user]["zip"])
         matched_user = {}
-        matched_user["email"] = user["email"]
+        matched_user["email"] = user
         matched_user["avail"] = []
 
         for loc in loc_data:
             distance = haversine(user_coor, loc["coordinates"], unit=Unit.MILES)
-            if distance < user["search_radius"]:
+            if distance < user_data[user]["search_radius"]:
                 loc["distance"] = distance
                 matched_user["avail"].append(loc)
 
@@ -51,12 +51,12 @@ def match_all():
         state_user = os.path.join("data/user", state_user)
 
         # load data for users and locations in the state
-        with open(state_user, "r") as f:
-            user_data = json.load(f)
-
         with open(state_loc, "r") as f:
             loc_data = json.load(f)
-    
+        
+        with open(state_user, "r") as f:
+            user_data = json.load(f)
+        
         all_matches += match_state(user_data, loc_data)
 
     return all_matches
