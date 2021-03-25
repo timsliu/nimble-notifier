@@ -60,9 +60,15 @@ def add_users(user_list):
 
     for row in user_list:
         state = row[3]     # access state abbreviation
-        state_json_path = "data/user/{}_users.json".format(state) 
-        with open(state_json_path, "r") as f:
-            state_list = json.load(f)
+        state_json_path = "data/user/{}_users.json".format(state)
+       
+        # load state data if it exists; otherwise use empty list
+        state_list = None
+        if os.path.exists(state_json_path):
+            with open(state_json_path, "r") as f:
+                state_list = json.load(f)
+        else:
+            state_list = []
         
         # create a new user dictionary
         new_user = {}
