@@ -73,8 +73,15 @@ def add_users(user_list):
         # create a new user dictionary
         new_user = {}
         new_user["email"] = row[1]
-        new_user["zip"] = int(row[2]) 
-        new_user["search_radius"] = int(row[4])
+       
+        # reject zip codes and search radii that are not integers
+        try:
+            new_user["zip"] = int(row[2]) 
+            new_user["search_radius"] = int(row[4])
+        except BaseException as e:
+            new_user["zip"] = 0
+            new_user["search_radius"] = 0
+
         new_user["last_avail"] = []
 
         # see if this new user is in the dictionary
