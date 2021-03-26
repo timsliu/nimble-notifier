@@ -67,7 +67,6 @@ def fetch_state(state):
     json_object = json.dumps(available, indent = 4)
     with open("data/location/{}_location.json".format(state), "w") as f:
         f.write(json_object)
-    print("Updated availability data for {}".format(state))
     return available
 
 if __name__ == "__main__":

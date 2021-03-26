@@ -37,10 +37,12 @@ def run_single(gmail_service, drive_service):
     update_users.remove_users(unsub_users) 
 
     user_states = update_users.all_states()            # get list of states 
+    print("Total users: {}".format(update_users.total_users()))
 
     # update all states with users
     for state in user_states:
         fetch_data.fetch_state(state)                       # update vaccine data
+    print("Updated availability data for {}".format(user_states))
     
     match_list = matcher.match_all()                             # match users w/ nearby vaccines
     sent, failed = notifier.send_all(match_list, gmail_service)  # send emails

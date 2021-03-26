@@ -8,7 +8,21 @@ import defs
 import json
 import os
 
-RANGE = "Responses!A:E"
+BUFFER_TIME = 10   # extra seconds before last tick to check for new users
+
+def total_users():
+    '''return the total number of active users'''
+    user_files = os.listdir(os.path.join(os.getcwd(), "data/user"))
+    user_files = filter(lambda x: "_users.json" in x, user_files)
+    total = 0
+   
+    # open each state user json file and count number of users
+    for state_path in user_files:
+        with open(os.path.join("data/user", state_path), "r") as f:
+            state_dict = json.load(f)
+        total += len(state_dict)
+
+    return total
 
 def all_states():
     '''create list of all states that there are users'''
@@ -24,7 +38,7 @@ def all_states():
 def new_entries(drive_service, sheet_name):
     '''read from the google spreadsheet and find new users'''
     # get last update time 
-    last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + 1)) 
+    last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + BUFFER_TIME)) 
     #last_tick = dt.datetime(2018, 1, 1)  # uncomment to force update
     
     # open json file with document IDs
