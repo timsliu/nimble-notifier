@@ -21,16 +21,30 @@ def match_state(user_data, loc_data):
         matched_user["email"] = user
         matched_user["avail"] = []
 
+        # for given user, search through all location looking for availability
         for loc in loc_data:
             distance = haversine(user_coor, loc["coordinates"], unit=Unit.MILES)
             if distance < user_data[user]["search_radius"]:
                 loc["distance"] = distance
                 matched_user["avail"].append(loc)
 
+        # availability found for this user
         if len(matched_user["avail"]) > 0:
-            match_list.append(matched_user)
+            # last availability emailed to user 
+            last_available = user_data[user]["last_avail"]
+            new_available = [loc["name"] for loc in matched_user["avail"]]
+            
+            # only mark a match and update the lastest availability if the
+            # new list is not a subset of the last availability sent out
+            #print("last_available", last_available)
+            #print("new_available", new_available)
 
-    return match_list
+            if not set(new_available).issubset(set(last_available)):
+                match_list.append(matched_user)
+                # record latest availability
+                user_data[user]["last_avail"] = new_available
+
+    return match_list, user_data
 
 def match_all():
     '''loop through all states, opening JSON and matching with the available
@@ -48,16 +62,23 @@ def match_all():
        
         # paths to the state location and state users
         state_loc = os.path.join("data/location", "{}_location.json".format(state))
-        state_user = os.path.join("data/user", state_user)
+        state_user_path = os.path.join("data/user", state_user)
 
         # load data for users and locations in the state
         with open(state_loc, "r") as f:
             loc_data = json.load(f)
         
-        with open(state_user, "r") as f:
-            user_data = json.load(f)
+        with open(state_user_path, "r") as f:
+            # open user file, find matches, and update last availability 
+            user_dict = json.load(f)
         
-        all_matches += match_state(user_data, loc_data)
+        # update list of all matches and dump the updated user data back
+        matches, user_dict = match_state(user_dict, loc_data)
+        all_matches += matches
+        
+        user_data = json.dumps(user_dict, indent = 4)
+        with open(state_user_path, "w") as f:
+            f.write(user_data)
 
     return all_matches
 

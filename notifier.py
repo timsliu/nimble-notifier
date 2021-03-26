@@ -52,8 +52,7 @@ def send_all(match_list, gmail_service):
             msg_txt
         )
         # attempt to send the email
-        #status = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
-        status = None 
+        status = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
         # track number of successful emails
         if status is not None:
             sent_emails += 1
