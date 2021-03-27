@@ -39,7 +39,7 @@ def new_entries(drive_service, sheet_name):
     '''read from the google spreadsheet and find new users'''
     # get last update time 
     last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + BUFFER_TIME)) 
-    #last_tick = dt.datetime(2018, 1, 1)  # uncomment to force update
+    #last_tick = dt.datetime(year=2021, month=3, day=27,hour=4)  # uncomment to force update
     
     # open json file with document IDs
     with open("data/credentials/doc_ids.json", "r") as f:

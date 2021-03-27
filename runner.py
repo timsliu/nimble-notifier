@@ -71,5 +71,5 @@ def run_continuous(gmail_service, drive_service):
 
 if __name__ == "__main__":
     gmail_service, drive_service = init()
-    #run_continuous(gmail_service, drive_service)
-    run_single(gmail_service, drive_service)
+    run_continuous(gmail_service, drive_service)
+    #run_single(gmail_service, drive_service)
