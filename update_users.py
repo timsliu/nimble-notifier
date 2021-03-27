@@ -8,7 +8,7 @@ import defs
 import json
 import os
 
-BUFFER_TIME = 10   # extra seconds before last tick to check for new users
+BUFFER_TIME = 5   # extra seconds before last tick to check for new users
 
 def total_users():
     '''return the total number of active users'''

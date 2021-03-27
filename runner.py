@@ -61,8 +61,11 @@ def run_continuous(gmail_service, drive_service):
             datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         ))
         try:
+            start = datetime.now()
             run_single(gmail_service, drive_service) 
-            time.sleep(defs.TICK_TIME)
+            end = datetime.now()
+            run_time = (end - start).seconds
+            time.sleep(defs.TICK_TIME - run_time)
         except BaseException as e:
             print("Failed: {}".format(e))
 
