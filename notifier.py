@@ -35,7 +35,7 @@ def format_msg(user):
 
     return email_body
 
-def send_all(match_list, gmail_service):
+def send_all(match_list, gmail_service, debug=False):
     '''send emails to all users with nearby vaccines'''
     sent_emails = 0               # total emails sent
     fail_emails = 0               # failed emails
@@ -52,6 +52,9 @@ def send_all(match_list, gmail_service):
             msg_txt
         )
         # attempt to send the email
+        #status = None
+        #print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
+        
         status = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
         # track number of successful emails
         if status is not None:

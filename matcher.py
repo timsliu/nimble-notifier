@@ -7,6 +7,7 @@ import os
 import json
 import util
 from haversine import haversine, Unit
+import copy
 
 def match_state(user_data, loc_data):
     '''match the people in a state with the available locations
@@ -25,8 +26,9 @@ def match_state(user_data, loc_data):
         for loc in loc_data:
             distance = haversine(user_coor, loc["coordinates"], unit=Unit.MILES)
             if distance < user_data[user]["search_radius"]:
-                loc["distance"] = distance
-                matched_user["avail"].append(loc)
+                matched_loc = copy.deepcopy(loc)          # deep copy the location
+                matched_loc["distance"] = distance        # set the distance
+                matched_user["avail"].append(matched_loc)
 
         # availability found for this user
         if len(matched_user["avail"]) > 0:
@@ -36,9 +38,6 @@ def match_state(user_data, loc_data):
             
             # only mark a match and update the lastest availability if the
             # new list is not a subset of the last availability sent out
-            #print("last_available", last_available)
-            #print("new_available", new_available)
-
             if not set(new_available).issubset(set(last_available)):
                 match_list.append(matched_user)
                 # record latest availability
