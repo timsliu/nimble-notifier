@@ -35,12 +35,12 @@ def all_states():
 
     return states
 
-def new_entries(drive_service, sheet_name):
+def new_entries(drive_service, sheet_name, last_tick=None):
     '''read from the google spreadsheet and find new users'''
     # get last update time 
-    last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + BUFFER_TIME)) 
-    #last_tick = dt.datetime(year=2021, month=3, day=27,hour=10, minute=40)  # uncomment to force update
-    
+    if last_tick is None:
+        last_tick = dt.datetime.now() - dt.timedelta(seconds=(defs.TICK_TIME + BUFFER_TIME)) 
+
     # open json file with document IDs
     with open("data/credentials/doc_ids.json", "r") as f:
         doc_ids = json.load(f)

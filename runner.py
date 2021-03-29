@@ -25,13 +25,13 @@ def init():
 def update_users_list(drive_service, last_tick=None):
     # find new users and update sheet
     new_users = update_users.new_entries(
-        drive_service, "new_user_sheet"
+        drive_service, "new_user_sheet", last_tick=last_tick
     )
     update_users.add_users(new_users)
     
     # find users who unsubscribed and update sheet
     unsub_users = update_users.new_entries(
-        drive_service, "unsub_user_sheet"
+        drive_service, "unsub_user_sheet", last_tick=last_tick
     )
     update_users.remove_users(unsub_users) 
 
@@ -95,7 +95,9 @@ if __name__ == "__main__":
 
     # only update users 
     if args.u:
-        update_users()
+        print("updating users")
+        last_tick = datetime(year=2021, month=3, day=29,hour=10, minute=20)  # uncomment to force update
+        update_users_list(drive_service, last_tick=last_tick)
         exit()
     
     # run a single iteration
