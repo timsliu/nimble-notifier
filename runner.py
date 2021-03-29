@@ -12,6 +12,8 @@ import time
 from datetime import datetime
 import defs
 import update_users
+import argparse
+
 
 def init():
     '''initializer - creates services for gmail and drive'''
@@ -20,10 +22,7 @@ def init():
 
     return gmail_service, drive_service
 
-def run_single(gmail_service, drive_service):
-    '''main loop for testing all processes - updates vaccine data, searches
-    for matches, and emails users'''
-    
+def update_users_list(drive_service, last_tick=None):
     # find new users and update sheet
     new_users = update_users.new_entries(
         drive_service, "new_user_sheet"
@@ -35,6 +34,13 @@ def run_single(gmail_service, drive_service):
         drive_service, "unsub_user_sheet"
     )
     update_users.remove_users(unsub_users) 
+
+
+def run_single(gmail_service, drive_service):
+    '''main loop for testing all processes - updates vaccine data, searches
+    for matches, and emails users'''
+    
+    update_users_list(drive_service, last_tick=None)
 
     user_states = update_users.all_states()            # get list of states 
     print("Total users: {}".format(update_users.total_users()))
@@ -60,16 +66,42 @@ def run_continuous(gmail_service, drive_service):
         print("\n=== Starting tick at time: {} ===".format(
             datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         ))
+        run_time = 0 
         try:
             start = datetime.now()
             run_single(gmail_service, drive_service) 
             end = datetime.now()
             run_time = (end - start).seconds
-            time.sleep(defs.TICK_TIME - run_time)
         except BaseException as e:
             print("Failed: {}".format(e))
+        
+        time.sleep(defs.TICK_TIME - run_time)
 
+def get_parser():
+    '''create argument parser'''
+    parser = argparse.ArgumentParser(description='Run Vaccine Notifier')
+
+    parser.add_argument('-s', action='store_true', help='run single time')
+    parser.add_argument('-u', action='store_true', help='update user')
+    parser.add_argument('-n', action='store_true', help='no send')
+
+    return parser
 if __name__ == "__main__":
+    parser = get_parser()
     gmail_service, drive_service = init()
-    run_continuous(gmail_service, drive_service)
-    #run_single(gmail_service, drive_service)
+
+    # parse arguments
+    args = parser.parse_args()
+
+    # only update users 
+    if args.u:
+        update_users()
+        exit()
+    
+    # run a single iteration
+    if args.s:
+        run_single(gmail_service, drive_service)
+    
+    # run continuously 
+    else:
+        run_continuous(gmail_service, drive_service)
