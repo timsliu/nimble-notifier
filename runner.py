@@ -36,7 +36,7 @@ def update_users_list(drive_service, last_tick=None):
     update_users.remove_users(unsub_users) 
 
 
-def run_single(gmail_service, drive_service):
+def run_single(gmail_service, drive_service, debug=None):
     '''main loop for testing all processes - updates vaccine data, searches
     for matches, and emails users'''
     
@@ -51,7 +51,7 @@ def run_single(gmail_service, drive_service):
     print("Updated availability data for {}".format(user_states))
     
     match_list = matcher.match_all()                             # match users w/ nearby vaccines
-    sent, failed = notifier.send_all(match_list, gmail_service)  # send emails
+    sent, failed = notifier.send_all(match_list, gmail_service, debug=debug)  # send emails
     print("Tick ending; sent {} out of {} attempted emails at {}".format(
         sent, 
         failed + sent, 
@@ -84,6 +84,7 @@ def get_parser():
     parser.add_argument('-s', action='store_true', help='run single time')
     parser.add_argument('-u', action='store_true', help='update user')
     parser.add_argument('-n', action='store_true', help='no send')
+    parser.add_argument('-d', action='store_true', help='debug mode')
 
     return parser
 if __name__ == "__main__":
@@ -112,7 +113,14 @@ if __name__ == "__main__":
         
         update_users_list(drive_service, last_tick=last_tick)
         exit()
-    
+  
+    # run in test mode
+    if args.d:
+        print("=== Running in debug mode ===")
+        address = str(input("Debug address: "))
+        run_single(gmail_service, drive_service, debug=address) 
+        exit()
+
     # run a single iteration
     if args.s:
         run_single(gmail_service, drive_service)
