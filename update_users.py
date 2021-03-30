@@ -4,6 +4,7 @@
 
 import drive_utils
 import datetime as dt
+import util
 import defs
 import json
 import os
@@ -94,7 +95,7 @@ def add_users(user_list):
         
         # create a new user dictionary
         new_user = {}
-        email_address = row[1]
+        email_address = util.clean_email_address(row[1])
         print("Adding/updating user: {}, {}".format(email_address, state))
        
         # reject zip codes and search radii that are not integers
@@ -117,7 +118,7 @@ def remove_users(user_list):
     '''remove a list of users from the user json'''
 
     for user in user_list:
-        email_address = user[1]
+        email_address = util.clean_email_address(user[1])
         state = user[2]
         state_json_path = "data/user/{}_users.json".format(state)
 

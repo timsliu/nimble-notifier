@@ -20,3 +20,10 @@ def zip_to_coors(zip_code):
         
     return [longitude, latitude]
 
+def clean_email_address(email_address):
+    '''changes an email address to all lower case and strips out spaces
+    at the end'''
+    email_address = email_address.lower()           # convert to lower case
+    email_address = email_address.replace(' ', '')  # strip out spaces
+
+    return email_address

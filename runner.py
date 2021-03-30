@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # only update users 
     if args.u:
         print("updating users")
-        last_tick = datetime(year=2021, month=3, day=29,hour=10, minute=20)  # uncomment to force update
+        last_tick = datetime(year=2021, month=3, day=30,hour=11, minute=00)  # uncomment to force update
         update_users_list(drive_service, last_tick=last_tick)
         exit()
     
