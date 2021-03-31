@@ -24,23 +24,28 @@ def init():
 
 def update_users_list(drive_service, last_tick=None):
     # find new users and update sheet
-    new_users = update_users.new_entries(
-        drive_service, "new_user_sheet", last_tick=last_tick
-    )
+    try:
+        new_users = update_users.new_entries(
+            drive_service, "new_user_sheet", last_tick=last_tick
+        )
+        # find users who unsubscribed and update sheet
+        unsub_users = update_users.new_entries(
+            drive_service, "unsub_user_sheet", last_tick=last_tick
+        )
+    except BaseException as e: 
+        print("Fetching new/unsub failed: {}".format(e))
+        return False
+
     update_users.add_users(new_users)
-    
-    # find users who unsubscribed and update sheet
-    unsub_users = update_users.new_entries(
-        drive_service, "unsub_user_sheet", last_tick=last_tick
-    )
     update_users.remove_users(unsub_users) 
+    
+    return True
 
-
-def run_single(gmail_service, drive_service, debug=None):
+def run_single(gmail_service, drive_service, debug=None, last_tick=None):
     '''main loop for testing all processes - updates vaccine data, searches
     for matches, and emails users'''
     
-    update_users_list(drive_service, last_tick=None)
+    update_user_success = update_users_list(drive_service, last_tick=last_tick)
 
     user_states = update_users.all_states()            # get list of states 
     print("Total users: {}".format(update_users.total_users()))
@@ -58,24 +63,35 @@ def run_single(gmail_service, drive_service, debug=None):
         datetime.now().strftime("%m/%d/%Y %H:%M:%S")
     ))
 
+    return update_user_success
 
 def run_continuous(gmail_service, drive_service):
     '''run all processes and continually loop''' 
+        
+    last_tick = None      # on startup, no last tick time
     
     while True:
         print("\n=== Starting tick at time: {} ===".format(
             datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         ))
-        run_time = 0 
+        
+        run_time = 0      # declare run time in case failure occurs
         try:
-            start = datetime.now()
-            run_single(gmail_service, drive_service) 
-            end = datetime.now()
+            start = datetime.now()    # record start time
+            update_user_success = run_single(gmail_service, drive_service, last_tick=last_tick) 
+          
+            # updating users succeeded - update the last tick to check
+            if update_user_success:
+                last_tick = start
+
+            end = datetime.now()     # record end time
             run_time = (end - start).seconds
+        
         except BaseException as e:
             print("Failed: {}".format(e))
-        
-        time.sleep(defs.TICK_TIME - run_time)
+       
+        sleep_time = max(0, defs.TICK_TIME - run_time)
+        time.sleep(sleep_time)
 
 def get_parser():
     '''create argument parser'''
