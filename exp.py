@@ -36,10 +36,10 @@ def reply_thread(gmail_service):
     email = gmail_utils.create_message(
         SENDER_ADDRESS, 
         test_email,
-        "Testing thread reply", 
+        "Re: Testing thread reply", 
         "I'm doing great! This is another reply",
-        threadid = threadid,
-        msgid = msgid,
+        thread_id = threadid,
+        msg_id = msgid,
     )
    
     # send reply message
