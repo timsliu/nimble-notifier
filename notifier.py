@@ -70,12 +70,17 @@ def send_all(match_list, gmail_service, debug=None):
     # loop through all users with nearby vaccines
     for user in match_list:
         msg_txt = format_msg(user)               # create message text
-       
+     
+        if user["thread_id"] is None:            # add Re: for replies
+            subject = SUBJECT
+        else:
+            subject = "Re: " + SUBJECT
+
         # generate an email object
         email = gmail_utils.create_message(
             SENDER_ADDRESS,
             user["email"],
-            SUBJECT,
+            subject,
             msg_txt,
             thread_id=user["thread_id"],
             msg_id=user["msg_id"],
