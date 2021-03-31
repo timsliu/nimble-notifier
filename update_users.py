@@ -107,8 +107,8 @@ def add_users(user_list):
             new_user["search_radius"] = 0
 
         new_user["last_avail"] = []         # last available locations
-        new_user["thread_id"] = ""          # threadID for threading emails
-        new_user["msg_id"] = ""             # message ID for threading
+        new_user["thread_id"] = None        # threadID for threading emails
+        new_user["msg_id"] = None           # message ID for threading
         
         state_dict[email_address] = new_user
 

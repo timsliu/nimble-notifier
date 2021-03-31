@@ -88,7 +88,6 @@ def send_all(match_list, gmail_service, debug=None):
             print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
             continue
        
-        print("sending...")
         msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
        
         # save info required for threading if it's not saved
