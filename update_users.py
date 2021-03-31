@@ -106,7 +106,10 @@ def add_users(user_list):
             new_user["zip"] = 0
             new_user["search_radius"] = 0
 
-        new_user["last_avail"] = []
+        new_user["last_avail"] = []         # last available locations
+        new_user["thread_id"] = ""          # threadID for threading emails
+        new_user["msg_id"] = ""             # message ID for threading
+        
         state_dict[email_address] = new_user
 
         # dump the updated json back

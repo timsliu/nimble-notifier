@@ -98,7 +98,7 @@ def GetMimeMessage(service, user_id, msg_id):
         print("Error {}".format(error))
         raise("Error {}".format(error))
  
-def create_message(sender, to, subject, message_text, threadid=None, msgid=None):
+def create_message(sender, to, subject, message_text, thread_id=None, msg_id=None):
     """Create a message for an email.
   
     Args:
@@ -114,20 +114,17 @@ def create_message(sender, to, subject, message_text, threadid=None, msgid=None)
     message['to'] = to
     message['from'] = sender
     message['subject'] = subject
+   
+    # if replying to a thread, set up the thread and message id
+    if thread_id is not None:
+        message['threadId'] = thread_id
+        message['References'] = msg_id
+        message['In-Reply-To'] = msg_id
     
-    if threadid is not None:
-        print("threadid: ", threadid) 
-        #print("msgid: ", msgid) 
-        message['threadId'] = threadid
-        message['References'] = msgid
-        message['In-Reply-To'] = msgid
-    print(message)
     raw = base64.urlsafe_b64encode(message.as_bytes())
     raw = raw.decode()
     body = {'raw': raw}
     
-    #if threadid is not None: 
-    #    body["threadID"] = threadid
     return body
 
 def create_message_with_attachment(

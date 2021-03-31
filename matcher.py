@@ -9,13 +9,15 @@ import util
 from haversine import haversine, Unit
 import copy
 
-def match_state(user_data, loc_data):
+def match_state(user_data, loc_data, state):
     '''match the people in a state with the available locations
     inputs: users - dictionary of users in a state
             locs - dictionary of availble locations in a state
+            state - string state being matched
     output: list of users with nearby locations'''
     match_list = []
 
+    # iterate through users, which are email addresses
     for user in user_data.keys():
         user_coor = util.zip_to_coors(user_data[user]["zip"])
         matched_user = {}
@@ -39,6 +41,15 @@ def match_state(user_data, loc_data):
             # only mark a match and update the lastest availability if the
             # new list is not a subset of the last availability sent out
             if not set(new_available).issubset(set(last_available)):
+                # copy thread_id and msg_id from user_data to be used in
+                # sending the emails
+                matched_user["state"] = state 
+                if "thread_id" in user_data[user].keys():
+                    matched_user["thread_id"] = user_data[user]["thread_id"] 
+                    matched_user["msg_id"] = user_data[user]["msg_id"]
+                else:
+                    matched_user["thread_id"] = None 
+                    matched_user["msg_id"] = None
                 match_list.append(matched_user)
                 # record latest availability
                 user_data[user]["last_avail"] = new_available
@@ -72,7 +83,7 @@ def match_all():
             user_dict = json.load(f)
         
         # update list of all matches and dump the updated user data back
-        matches, user_dict = match_state(user_dict, loc_data)
+        matches, user_dict = match_state(user_dict, loc_data, state)
         all_matches += matches
         
         user_data = json.dumps(user_dict, indent = 4)

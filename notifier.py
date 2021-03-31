@@ -3,10 +3,37 @@
 # This program auto sends emails when a vaccine is found
 
 import gmail_utils
+import util
+import json
 
 SENDER_ADDRESS = "nimblenotifier@gmail.com"
 SUBJECT = "Potential Covid-19 Vaccine Appointments in your Area"
 
+def set_thread_id(gmail_service, user, msg):
+
+    mime = gmail_utils.GetMimeMessage(
+        gmail_service,
+        SENDER_ADDRESS,
+        msg["id"]
+    )
+    
+    # get msgid and threadid
+    msg_id = util.parse_by_prefix(mime.as_string(), "Message-Id: ", end_char = [">"]) + ">"
+    thread_id = msg["threadId"]
+
+    state_json_path = "data/user/{}_users.json".format(user["state"])
+
+    with open(state_json_path, "r") as f:
+        state_dict = json.load(f)
+
+    state_dict[user["email"]]["thread_id"] = thread_id
+    state_dict[user["email"]]["msg_id"] = msg_id
+
+    state_data = json.dumps(state_dict, indent = 4)
+    with open(state_json_path, "w") as f:
+        f.write(state_data)
+
+    return
 
 def format_msg(user):
     '''create a formatted user message with available appointments'''
@@ -43,28 +70,32 @@ def send_all(match_list, gmail_service, debug=None):
     # loop through all users with nearby vaccines
     for user in match_list:
         msg_txt = format_msg(user)               # create message text
-        
+       
         # generate an email object
         email = gmail_utils.create_message(
             SENDER_ADDRESS,
             user["email"],
             SUBJECT,
-            msg_txt
+            msg_txt,
+            thread_id=user["thread_id"],
+            msg_id=user["msg_id"],
         )
         
-        status = None
-        # send all emails in debug mode
-        if debug is None: 
-            status = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
-            # track number of successful emails
-
-        else:
+        msg = None
+       
+        # debug mode - only email the debug address
+        if debug is not None and user["email"] != debug:
             print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
-            if user["email"] == debug:
-                #status = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
-                pass
-        
-        if status is not None:
+            continue
+       
+        print("sending...")
+        msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
+       
+        # save info required for threading if it's not saved
+        if user["thread_id"] is None: 
+            set_thread_id(gmail_service, user, msg)
+
+        if msg is not None:
             sent_emails += 1
         else:
             fail_emails += 1
