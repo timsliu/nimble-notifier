@@ -5,9 +5,11 @@
 import gmail_utils
 import util
 import json
+import time
 
 SENDER_ADDRESS = "nimblenotifier@gmail.com"
 SUBJECT = "Potential Covid-19 Vaccine Appointments in your Area"
+EMAIL_WAIT = 0.5
 
 def set_thread_id(gmail_service, user, msg):
 
@@ -99,9 +101,18 @@ def send_all(match_list, gmail_service, debug=None):
         if user["thread_id"] is None: 
             set_thread_id(gmail_service, user, msg)
 
+        # send succeeded
         if msg is not None:
             sent_emails += 1
+            
+            # save info required for threading if it's not saved
+            if user["thread_id"] is None: 
+                set_thread_id(gmail_service, user, msg)
+        # send failed 
         else:
             fail_emails += 1
+        
+        time.sleep(EMAIL_WAIT)    # wait before sending next email to prevent
+                                  # exceeding usage limit
 
     return sent_emails, fail_emails
