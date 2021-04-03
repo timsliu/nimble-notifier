@@ -15,10 +15,10 @@ def zip_to_coors(zip_code):
         latitude = zip_info.latitude
     except KeyError as e:
         missing_zips = {94158: [37.771, -122.391]}
-        longitude = missing_zips[zip_code][1]
         latitude  = missing_zips[zip_code][0]
+        longitude = missing_zips[zip_code][1]
         
-    return [longitude, latitude]
+    return [latitude, longitude]
 
 def clean_email_address(email_address):
     '''changes an email address to all lower case and strips out spaces

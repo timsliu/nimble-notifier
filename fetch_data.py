@@ -52,7 +52,9 @@ def fetch_state(state):
         if loc["properties"]["appointments_available"]:
             # copy over relevant information 
             avail_loc = {}
-            avail_loc["coordinates"] = loc["geometry"]["coordinates"]
+            # vaccine spotter stores coordinates backwards from convention - 
+            # flip to standard lat, lon coordinates
+            avail_loc["coordinates"] = list(reversed(loc["geometry"]["coordinates"]))
             avail_loc["zip"] = loc["properties"]["postal_code"]
             avail_loc["url"] = loc["properties"]["url"]
             avail_loc["name"] = "{} {} {}".format(
