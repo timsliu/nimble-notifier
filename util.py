@@ -63,3 +63,7 @@ def parse_by_line(input_string, prefix_string, offset):
 
     return split_by_line[prefix_line + offset]
 
+
+class APIUseExceededError(Exception):
+    '''custom error class for when the API use is exceeded''' 
+    pass

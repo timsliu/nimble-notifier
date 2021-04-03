@@ -19,6 +19,7 @@ import base64
 import html2text
 import pickle
 import email
+from util import APIUseExceededError
 
 
 # If modifying these scopes, delete the file data/credentials/token_gmail.pickle.
@@ -26,6 +27,8 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.compose',
           'https://www.googleapis.com/auth/gmail.readonly',
           'https://www.googleapis.com/auth/drive.activity']
 
+# string indicated HttpError 429 exceeded email use limit
+OVERUSE_STR = "User-rate limit exceeded"
 
 def GetService():
     """Shows basic usage of the Gmail API.
@@ -205,7 +208,6 @@ def create_draft(service, user_id, message_body):
   
         return draft
     except errors.HttpError as error:
-        print('An error occurred: %s' % error)
         return None
 
 
@@ -229,3 +231,5 @@ def send_message(service, user_id, message):
     return message
   except errors.HttpError as error:
     print('An error occurred: %s' % error)
+    if OVERUSE_STR in str(error):
+        raise APIUseExceededError("Gmail API usage limit exceeded")

@@ -13,6 +13,7 @@ from datetime import datetime
 import defs
 import update_users
 import argparse
+from util import APIUseExceededError
 
 
 def init():
@@ -54,7 +55,7 @@ def run_single(gmail_service, drive_service, debug=None, last_tick=None):
     for state in user_states:
         fetch_data.fetch_state(state)                       # update vaccine data
     print("Updated availability data for {}".format(user_states))
-    
+   
     match_list = matcher.match_all()                             # match users w/ nearby vaccines
     sent, failed = notifier.send_all(match_list, gmail_service, debug=debug)  # send emails
     print("Tick ending; sent {} out of {} attempted emails at {}".format(
@@ -86,7 +87,10 @@ def run_continuous(gmail_service, drive_service):
 
             end = datetime.now()     # record end time
             run_time = (end - start).seconds
-        
+        except APIUseExceededError as e:
+            print("API Use exceeded - temporarily pausing")
+            sleep(defs.PAUSE_TIME)
+
         except BaseException as e:
             print("Failed: {}".format(e))
        

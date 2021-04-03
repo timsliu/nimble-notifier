@@ -11,6 +11,7 @@ from datetime import datetime
 from pyzipcode import ZipCodeDatabase
 import util
 
+SKIP_LIST = ['safeway', 'riteaid']    # list of pharmacies to skip
 
 def fill_coordinates(avail_loc):
     '''helper function writes in the coordinates of a location using the
@@ -42,6 +43,11 @@ def fetch_state(state):
     available = []
     
     for loc in locations["features"]:
+       
+        # skip unreliable pharmacies
+        if True in [pharmacy in str(loc["properties"]["url"]) for pharmacy in SKIP_LIST]:
+            continue
+
         # appointments are available 
         if loc["properties"]["appointments_available"]:
             # copy over relevant information 
