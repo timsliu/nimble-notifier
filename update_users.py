@@ -11,6 +11,15 @@ import os
 
 BUFFER_TIME = 5   # extra seconds before last tick to check for new users
 
+# map between strings indicating refresh time and seconds
+update_period = {
+    "1 minute"  : 60,
+    "5 minutes" : 300, 
+    "10 minutes": 600,
+    "20 minutes": 1200,
+    "1 hour"    : 3600,
+}
+
 def total_users():
     '''return the total number of active users'''
     user_files = os.listdir(os.path.join(os.getcwd(), "data/user"))
@@ -114,7 +123,9 @@ def add_users(user_list):
         new_user["last_avail"] = []         # last available locations
         new_user["thread_id"] = None        # threadID for threading emails
         new_user["msg_id"] = None           # message ID for threading
-        
+        new_user["rand_offset"] =    #TODO       # random i 
+        new_user["refresh_interval"] = update_period[row[5]]  # sec. between updates
+
         state_dict[email_address] = new_user
 
         # dump the updated json back

@@ -8,6 +8,30 @@ import json
 import util
 from haversine import haversine, Unit
 import copy
+import defs
+        
+def users_this_tick(user_dict, tick):
+    '''filters a user dictionary for users that should be updated this tick
+    given the refresh period and random offset''' 
+    
+    # no tick indicates all users should be updated
+    if tick is None:
+        return user_dict
+
+    # list of users to update this tick 
+    user_dict_filtered = {} 
+    for email in user_dict.keys():
+        user = user_dict[email]
+
+        # number of ticks between updates
+        update_freq_ticks = max(1, int(user["refresh_interval"]/util.TICK_TIME))
+        # offset for which tick to update 
+        rand_offset_wrapped = user["rand_offset"] % update_freq_ticks
+
+        if tick % update_freq_ticks == rand_offset_wrapped:
+            user_dict_filtered[email] = copy.deepcopy(user)
+
+    return user_dict_filtered
 
 def match_state(user_data, loc_data, state):
     '''match the people in a state with the available locations
@@ -56,11 +80,12 @@ def match_state(user_data, loc_data, state):
 
     return match_list, user_data
 
-def match_all():
+def match_all(tick=None):
     '''loop through all states, opening JSON and matching with the available
     sites in that state
 
-    inputs: None
+    inputs: tick (optional) - integer index of the current tick; used to
+            determine which users to update
     output: list of emails and nearby locations'''
     
     all_matches = []        # list of all users w/ matches
@@ -77,10 +102,14 @@ def match_all():
         # load data for users and locations in the state
         with open(state_loc, "r") as f:
             loc_data = json.load(f)
+
         
         with open(state_user_path, "r") as f:
             # open user file, find matches, and update last availability 
             user_dict = json.load(f)
+       
+        # filter for only users who should be updated this tick
+        user_dict = users_this_tick(user_dict, tick)
         
         # update list of all matches and dump the updated user data back
         matches, user_dict = match_state(user_dict, loc_data, state)
