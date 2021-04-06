@@ -9,7 +9,7 @@ import util
 from haversine import haversine, Unit
 import copy
 import defs
-        
+       
 def users_this_tick(user_dict, tick):
     '''filters a user dictionary for users that should be updated this tick
     given the refresh period and random offset''' 
@@ -24,7 +24,7 @@ def users_this_tick(user_dict, tick):
         user = user_dict[email]
 
         # number of ticks between updates
-        update_freq_ticks = max(1, int(user["refresh_interval"]/util.TICK_TIME))
+        update_freq_ticks = max(1, int(user["refresh_interval"]/defs.TICK_TIME))
         # offset for which tick to update 
         rand_offset_wrapped = user["rand_offset"] % update_freq_ticks
 
