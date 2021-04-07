@@ -42,9 +42,14 @@ def update_users_list(drive_service, last_tick=None):
     
     return True
 
-def run_single(gmail_service, drive_service, debug=None, last_tick=None):
+def run_single(gmail_service, drive_service, debug=None, last_tick=None, tick_index=None):
     '''main loop for testing all processes - updates vaccine data, searches
-    for matches, and emails users'''
+    for matches, and emails users
+    inputs: gmail_service - service for accessing gmail
+            drive_service - service for accessing google drive
+            debug - email address to use for debug mode
+            last_tick = time of last tick
+            tick_index = index of the current tick'''
     
     update_user_success = update_users_list(drive_service, last_tick=last_tick)
 
@@ -56,7 +61,7 @@ def run_single(gmail_service, drive_service, debug=None, last_tick=None):
         fetch_data.fetch_state(state)                       # update vaccine data
     print("Updated availability data for {}".format(user_states))
    
-    match_list = matcher.match_all()                             # match users w/ nearby vaccines
+    match_list = matcher.match_all(tick=tick_index)                           # match users w/ nearby vaccines
     sent, failed = notifier.send_all(match_list, gmail_service, debug=debug)  # send emails
     print("Tick ending; sent {} out of {} attempted emails at {}".format(
         sent, 
@@ -70,16 +75,24 @@ def run_continuous(gmail_service, drive_service):
     '''run all processes and continually loop''' 
         
     last_tick = None      # on startup, no last tick time
+    tick_index = 0        # index of current tick
     
     while True:
-        print("\n=== Starting tick at time: {} ===".format(
+        print("\n=== Starting tick {} at time: {} ===".format(tick_index,
             datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         ))
         
         run_time = 0      # declare run time in case failure occurs
         try:
             start = datetime.now()    # record start time
-            update_user_success = run_single(gmail_service, drive_service, last_tick=last_tick) 
+           
+            # run a single iteration
+            update_user_success = run_single(
+                gmail_service, 
+                drive_service, 
+                last_tick=last_tick, 
+                tick_index=tick_index
+            ) 
           
             # updating users succeeded - update the last tick to check
             if update_user_success:
@@ -87,15 +100,19 @@ def run_continuous(gmail_service, drive_service):
 
             end = datetime.now()     # record end time
             run_time = (end - start).seconds
+       
+        # failure due to exceeding API use limit 
         except APIUseExceededError as e:
             print("API Use exceeded - temporarily pausing")
-            sleep(defs.PAUSE_TIME)
+            time.sleep(defs.PAUSE_TIME)
 
+        # any other exception
         except BaseException as e:
             print("Failed: {}".format(e))
        
         sleep_time = max(0, defs.TICK_TIME - run_time)
         time.sleep(sleep_time)
+        tick_index += 1
 
 def get_parser():
     '''create argument parser'''
@@ -143,7 +160,7 @@ if __name__ == "__main__":
 
     # run a single iteration
     if args.s:
-        run_single(gmail_service, drive_service)
+        run_single(gmail_service, drive_service, tick_index=None)
     
     # run continuously 
     else:

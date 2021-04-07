@@ -2,6 +2,8 @@
 #
 # utility functions common to multiple files
 
+import json
+import os
 from pyzipcode import ZipCodeDatabase
 
 zcdb = ZipCodeDatabase()
@@ -63,6 +65,28 @@ def parse_by_line(input_string, prefix_string, offset):
 
     return split_by_line[prefix_line + offset]
 
+def modify_all_users(field, value):
+    '''modify a data field for all users'''
+    user_files = os.listdir(os.path.join(os.getcwd(), "data/user"))
+    user_files = filter(lambda x: "_users.json" in x, user_files)
+
+    # iterate through all state json files
+    for state_file in user_files:
+        # prepend the relative path 
+        state_json_path = os.path.join("data/user", state_file) 
+        with open(state_json_path, "r") as f:
+            user_dict = json.load(f)
+
+        # modify all values
+        for email in user_dict.keys():
+            user_dict[email][field] = value
+
+        # write value back to file
+        state_data = json.dumps(user_dict, indent=4)
+        with open(state_json_path, "w") as f:
+            f.write(state_data)
+
+    return
 
 class APIUseExceededError(Exception):
     '''custom error class for when the API use is exceeded''' 
