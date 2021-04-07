@@ -5,6 +5,7 @@
 import json
 import os
 from pyzipcode import ZipCodeDatabase
+import random
 
 zcdb = ZipCodeDatabase()
 
@@ -79,7 +80,7 @@ def modify_all_users(field, value):
 
         # modify all values
         for email in user_dict.keys():
-            user_dict[email][field] = value
+            user_dict[email][field] = value #random.randint(0, 9999)
 
         # write value back to file
         state_data = json.dumps(user_dict, indent=4)
