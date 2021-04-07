@@ -16,10 +16,10 @@ def users_this_tick(user_dict, tick):
     
     # no tick indicates all users should be updated
     if tick is None:
-        return user_dict
+        return list(user_dict.keys())
 
+    tick_list = [] 
     # list of users to update this tick 
-    user_dict_filtered = {} 
     for email in user_dict.keys():
         user = user_dict[email]
 
@@ -29,20 +29,21 @@ def users_this_tick(user_dict, tick):
         rand_offset_wrapped = user["rand_offset"] % update_freq_ticks
 
         if tick % update_freq_ticks == rand_offset_wrapped:
-            user_dict_filtered[email] = copy.deepcopy(user)
+            tick_list.append(email)
 
-    return user_dict_filtered
+    return tick_list
 
-def match_state(user_data, loc_data, state):
+def match_state(user_data, loc_data, state, tick_list):
     '''match the people in a state with the available locations
     inputs: users - dictionary of users in a state
             locs - dictionary of availble locations in a state
             state - string state being matched
+            tick_list - list of emails to update this tick
     output: list of users with nearby locations'''
     match_list = []
 
     # iterate through users, which are email addresses
-    for user in user_data.keys():
+    for user in tick_list:
         user_coor = util.zip_to_coors(user_data[user]["zip"])
         matched_user = {}
         matched_user["email"] = user
@@ -107,15 +108,15 @@ def match_all(tick=None):
         with open(state_user_path, "r") as f:
             # open user file, find matches, and update last availability 
             user_dict = json.load(f)
-       
-        # filter for only users who should be updated this tick
-        user_dict = users_this_tick(user_dict, tick)
+      
+        # create list of users to update this tick
+        tick_list = users_this_tick(user_dict, tick)
         
         # update list of all matches and dump the updated user data back
-        matches, user_dict = match_state(user_dict, loc_data, state)
+        matches, user_dict = match_state(user_dict, loc_data, state, tick_list)
         all_matches += matches
         
-        user_data = json.dumps(user_dict, indent = 4)
+        user_data = json.dumps(user_dict, indent=4)
         with open(state_user_path, "w") as f:
             f.write(user_data)
 

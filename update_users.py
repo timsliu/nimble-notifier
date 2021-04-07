@@ -8,8 +8,9 @@ import util
 import defs
 import json
 import os
+import random
 
-BUFFER_TIME = 5   # extra seconds before last tick to check for new users
+BUFFER_TIME = 2   # extra seconds before last tick to check for new users
 
 # map between strings indicating refresh time and seconds
 update_period = {
@@ -96,6 +97,7 @@ def add_users(user_list):
     # TODO - sort by state and only open when the state changes
 
     for row in user_list:
+        print(row)
         state = row[3]     # access state abbreviation
         state_json_path = "data/user/{}_users.json".format(state)
        
@@ -123,7 +125,7 @@ def add_users(user_list):
         new_user["last_avail"] = []         # last available locations
         new_user["thread_id"] = None        # threadID for threading emails
         new_user["msg_id"] = None           # message ID for threading
-        new_user["rand_offset"] =    #TODO       # random i 
+        new_user["rand_offset"] = random.randint(0, 9999) 
         new_user["refresh_interval"] = update_period[row[5]]  # sec. between updates
 
         state_dict[email_address] = new_user

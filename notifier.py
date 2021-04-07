@@ -12,7 +12,12 @@ SUBJECT = "Potential Covid-19 Vaccine Appointments in your Area"
 EMAIL_WAIT = 0.5
 
 def set_thread_id(gmail_service, user, msg):
-
+    '''sets the thread ID for a user to enable replying to the same thread'''
+   
+    # msg failed - don't set the thread id
+    if msg is None:
+        return
+    
     mime = gmail_utils.GetMimeMessage(
         gmail_service,
         SENDER_ADDRESS,
@@ -95,7 +100,7 @@ def send_all(match_list, gmail_service, debug=None):
             print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
             continue
        
-        msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
+        #msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
        
         # save info required for threading if it's not saved
         if user["thread_id"] is None: 

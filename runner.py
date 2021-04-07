@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     # run a single iteration
     if args.s:
-        run_single(gmail_service, drive_service, tick_index=None)
+        run_single(gmail_service, drive_service)
     
     # run continuously 
     else:
