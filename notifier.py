@@ -99,8 +99,8 @@ def send_all(match_list, gmail_service, debug=None):
         if debug is not None and user["email"] != debug:
             print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
             continue
-       
-        #msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
+      
+        msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
        
         # save info required for threading if it's not saved
         if user["thread_id"] is None: 

@@ -85,7 +85,7 @@ def run_continuous(gmail_service, drive_service):
         run_time = 0      # declare run time in case failure occurs
         try:
             start = datetime.now()    # record start time
-           
+            
             # run a single iteration
             update_user_success = run_single(
                 gmail_service, 
@@ -93,14 +93,14 @@ def run_continuous(gmail_service, drive_service):
                 last_tick=last_tick, 
                 tick_index=tick_index
             ) 
-          
+            
             # updating users succeeded - update the last tick to check
             if update_user_success:
                 last_tick = start
 
             end = datetime.now()     # record end time
             run_time = (end - start).seconds
-       
+           
         # failure due to exceeding API use limit 
         except APIUseExceededError as e:
             print("API Use exceeded - temporarily pausing")
@@ -111,8 +111,8 @@ def run_continuous(gmail_service, drive_service):
             print("Failed: {}".format(e))
        
         sleep_time = max(0, defs.TICK_TIME - run_time)
-        time.sleep(sleep_time)
         tick_index += 1
+        time.sleep(sleep_time)
 
 def get_parser():
     '''create argument parser'''

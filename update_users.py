@@ -88,7 +88,8 @@ def new_entries(drive_service, sheet_name, last_tick=None):
             last_new = i 
             break
 
-    return values[0:last_new]
+    # reverse back so users are updated chronologically
+    return list(reversed(values[0:last_new]))
 
 
 def add_users(user_list):
@@ -97,7 +98,6 @@ def add_users(user_list):
     # TODO - sort by state and only open when the state changes
 
     for row in user_list:
-        print(row)
         state = row[3]     # access state abbreviation
         state_json_path = "data/user/{}_users.json".format(state)
        
