@@ -14,15 +14,14 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
     log_path = os.path.join("data/logs/", "log_{}.txt".format(start_time))
 
+    f = open(log_path, "w")
     # thread for running Vaccine Notifier
     t1 = threading.Thread(target=lambda: subprocess.run(
     [
         "python3",
         "-u", 
-        "runner.py", 
-        " >", 
-        log_path
-    ]))
+        "runner.py"
+    ], stdout=f))
    
     # display output to the terminal
     t2 = threading.Thread(target=lambda: subprocess.run(
