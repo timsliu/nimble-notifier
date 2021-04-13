@@ -30,16 +30,19 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.compose',
 # string indicated HttpError 429 exceeded email use limit
 OVERUSE_STR = "User-rate limit exceeded"
 
-def GetService():
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
+def GetService(index=0):
+    """Return a gmail service
+    inputs: index - index of the gmail credential to use; default to zero
     """
     creds = None
     # The file data/credentials/token_gmail.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('data/credentials/token_gmail.pickle'):
-        with open('data/credentials/token_gmail.pickle', 'rb') as token:
+    token_path = 'data/credentials/token_gmail_{}.pickle'.format(index)
+    creds_path = 'data/credentials/credentials_gmail_{}.json'.format(index)
+    
+    if os.path.exists(token_path):
+        with open(token_path, 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -47,10 +50,10 @@ def GetService():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'data/credentials/credentials_gmail.json', SCOPES)
+                creds_path, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('data/credentials/token_gmail.pickle', 'wb') as token:
+        with open(token_path, 'wb') as token:
             pickle.dump(creds, token)
 
     service = build('gmail', 'v1', credentials=creds)

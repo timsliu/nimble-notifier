@@ -11,7 +11,27 @@ SENDER_ADDRESS = "nimblenotifier@gmail.com"
 SUBJECT = "Potential Covid-19 Vaccine Appointments in your Area"
 EMAIL_WAIT = 0.5
 
-def set_thread_id(gmail_service, user, msg):
+def select_service(gmail_services, user):
+    '''returns the gmail service to use for this user based on the user's
+    random offset
+    inputs: gmail_services - list of gmail services, one for each account
+            user - dictionary of user data
+    outputs: gmail_service - gmail service to use
+             address - address corresponding to the gmail service'''
+
+    rand_offset = user["rand_offset"]               # look up user random offset
+    service_idx = rand_offset % len(gmail_services) # calculate index
+    
+    if service_idx != 0:
+        suffix = service_idx
+    else:
+        suffix = ""
+  
+    address = "nimblenotifier{}@gmail.com".format(suffix)
+
+    return gmail_services[service_idx], address
+
+def set_thread_id(gmail_service, user, msg, sender_address):
     '''sets the thread ID for a user to enable replying to the same thread'''
    
     # msg failed - don't set the thread id
@@ -20,7 +40,7 @@ def set_thread_id(gmail_service, user, msg):
     
     mime = gmail_utils.GetMimeMessage(
         gmail_service,
-        SENDER_ADDRESS,
+        sender_address,
         msg["id"]
     )
     
@@ -69,7 +89,7 @@ def format_msg(user):
 
     return email_body
 
-def send_all(match_list, gmail_service, debug=None):
+def send_all(match_list, gmail_services, debug=None):
     '''send emails to all users with nearby vaccines'''
     sent_emails = 0               # total emails sent
     fail_emails = 0               # failed emails
@@ -82,10 +102,12 @@ def send_all(match_list, gmail_service, debug=None):
             subject = SUBJECT
         else:
             subject = "Re: " + SUBJECT
+        
+        gmail_service, sender_address = select_service(gmail_services, user)
 
         # generate an email object
         email = gmail_utils.create_message(
-            SENDER_ADDRESS,
+            sender_address,
             user["email"],
             subject,
             msg_txt,
@@ -94,17 +116,16 @@ def send_all(match_list, gmail_service, debug=None):
         )
         
         msg = None
-       
         # debug mode - only email the debug address
         if debug is not None and user["email"] != debug:
             print("\n==== Recipient: {} ====\n{}".format(user["email"], msg_txt))
             continue
       
-        msg = gmail_utils.send_message(gmail_service, SENDER_ADDRESS, email)
+        msg = gmail_utils.send_message(gmail_service, sender_address, email)
        
         # save info required for threading if it's not saved
         if user["thread_id"] is None: 
-            set_thread_id(gmail_service, user, msg)
+            set_thread_id(gmail_service, user, msg, sender_address)
 
         # send succeeded
         if msg is not None:
@@ -112,7 +133,7 @@ def send_all(match_list, gmail_service, debug=None):
             
             # save info required for threading if it's not saved
             if user["thread_id"] is None: 
-                set_thread_id(gmail_service, user, msg)
+                set_thread_id(gmail_service, user, msg, sender_address)
         # send failed 
         else:
             fail_emails += 1

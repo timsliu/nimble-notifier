@@ -66,9 +66,10 @@ def match_state(user_data, loc_data, state, tick_list):
             # only mark a match and update the lastest availability if the
             # new list is not a subset of the last availability sent out
             if not set(new_available).issubset(set(last_available)):
+                matched_user["state"] = state 
+                matched_user["rand_offset"] = user_data[user]["rand_offset"]
                 # copy thread_id and msg_id from user_data to be used in
                 # sending the emails
-                matched_user["state"] = state 
                 if "thread_id" in user_data[user].keys():
                     matched_user["thread_id"] = user_data[user]["thread_id"] 
                     matched_user["msg_id"] = user_data[user]["msg_id"]
@@ -76,7 +77,8 @@ def match_state(user_data, loc_data, state, tick_list):
                     matched_user["thread_id"] = None 
                     matched_user["msg_id"] = None
                 match_list.append(matched_user)
-                # record latest availability
+                
+                # record latest availability in the user dict saved to json
                 user_data[user]["last_avail"] = new_available
 
     return match_list, user_data

@@ -16,12 +16,21 @@ import argparse
 from util import APIUseExceededError
 
 
-def init():
-    '''initializer - creates services for gmail and drive'''
-    gmail_service = gmail_utils.GetService()                   # get gmail service
+def init(num_accts):
+    '''initializer - creates services for gmail and drive
+    inputs: num_accts (list) list of accounts indices and gmail services to fetch
+    output: gmail_services - list of gmail services
+            drive_service - single drive service'''
+    gmail_services = []
+    
+    # get all gmail services
+    for i in num_accts:
+        gmail_services.append(gmail_utils.GetService(index=i)) # get gmail service
+    
+    # get single drive service
     drive_service = drive_utils.GetSheetService()              # get drive service
 
-    return gmail_service, drive_service
+    return gmail_services, drive_service
 
 def update_users_list(drive_service, last_tick=None):
     # find new users and update sheet
@@ -42,10 +51,10 @@ def update_users_list(drive_service, last_tick=None):
     
     return True
 
-def run_single(gmail_service, drive_service, debug=None, last_tick=None, tick_index=None):
+def run_single(gmail_services, drive_service, debug=None, last_tick=None, tick_index=None):
     '''main loop for testing all processes - updates vaccine data, searches
     for matches, and emails users
-    inputs: gmail_service - service for accessing gmail
+    inputs: gmail_services - list of services for accessing gmail
             drive_service - service for accessing google drive
             debug - email address to use for debug mode
             last_tick = time of last tick
@@ -62,7 +71,7 @@ def run_single(gmail_service, drive_service, debug=None, last_tick=None, tick_in
     print("Updated availability data for {}".format(user_states))
    
     match_list = matcher.match_all(tick=tick_index)                           # match users w/ nearby vaccines
-    sent, failed = notifier.send_all(match_list, gmail_service, debug=debug)  # send emails
+    sent, failed = notifier.send_all(match_list, gmail_services, debug=debug)  # send emails
     print("Tick ending; sent {} out of {} attempted emails at {}".format(
         sent, 
         failed + sent, 
@@ -71,7 +80,7 @@ def run_single(gmail_service, drive_service, debug=None, last_tick=None, tick_in
 
     return update_user_success
 
-def run_continuous(gmail_service, drive_service):
+def run_continuous(gmail_services, drive_service):
     '''run all processes and continually loop''' 
         
     last_tick = None      # on startup, no last tick time
@@ -83,32 +92,32 @@ def run_continuous(gmail_service, drive_service):
         ))
         
         run_time = 0      # declare run time in case failure occurs
-        try:
-            start = datetime.now()    # record start time
-            
-            # run a single iteration
-            update_user_success = run_single(
-                gmail_service, 
-                drive_service, 
-                last_tick=last_tick, 
-                tick_index=tick_index
-            ) 
-            
-            # updating users succeeded - update the last tick to check
-            if update_user_success:
-                last_tick = start
+        #try:
+        start = datetime.now()    # record start time
+        
+        # run a single iteration
+        update_user_success = run_single(
+            gmail_services, 
+            drive_service, 
+            last_tick=last_tick, 
+            tick_index=tick_index
+        ) 
+        
+        # updating users succeeded - update the last tick to check
+        if update_user_success:
+            last_tick = start
 
-            end = datetime.now()     # record end time
-            run_time = (end - start).seconds
+        end = datetime.now()     # record end time
+        run_time = (end - start).seconds
            
         # failure due to exceeding API use limit 
-        except APIUseExceededError as e:
-            print("API Use exceeded - temporarily pausing")
-            time.sleep(defs.PAUSE_TIME)
+        #except APIUseExceededError as e:
+        #    print("API Use exceeded - temporarily pausing")
+        #    time.sleep(defs.PAUSE_TIME)
 
-        # any other exception
-        except BaseException as e:
-            print("Failed: {}".format(e))
+        ## any other exception
+        #except BaseException as e:
+        #    print("Failed: {}".format(e))
        
         sleep_time = max(0, defs.TICK_TIME - run_time)
         tick_index += 1
@@ -126,7 +135,7 @@ def get_parser():
     return parser
 if __name__ == "__main__":
     parser = get_parser()
-    gmail_service, drive_service = init()
+    gmail_services, drive_service = init(list(range(defs.NUM_ACCTS)))
 
     # parse arguments
     args = parser.parse_args()
@@ -155,13 +164,13 @@ if __name__ == "__main__":
     if args.d:
         print("=== Running in debug mode ===")
         address = str(input("Debug address: "))
-        run_single(gmail_service, drive_service, debug=address) 
+        run_single(gmail_services, drive_service, debug=address) 
         exit()
 
     # run a single iteration
     if args.s:
-        run_single(gmail_service, drive_service)
+        run_single(gmail_services, drive_service)
     
     # run continuously 
     else:
-        run_continuous(gmail_service, drive_service)
+        run_continuous(gmail_services, drive_service)
