@@ -25,6 +25,7 @@ def init(num_accts):
     
     # get all gmail services
     for i in num_accts:
+        print("Authenticating account: {}".format(i))
         gmail_services.append(gmail_utils.GetService(index=i)) # get gmail service
     
     # get single drive service
@@ -92,32 +93,32 @@ def run_continuous(gmail_services, drive_service):
         ))
         
         run_time = 0      # declare run time in case failure occurs
-        #try:
-        start = datetime.now()    # record start time
-        
-        # run a single iteration
-        update_user_success = run_single(
-            gmail_services, 
-            drive_service, 
-            last_tick=last_tick, 
-            tick_index=tick_index
-        ) 
-        
-        # updating users succeeded - update the last tick to check
-        if update_user_success:
-            last_tick = start
+        try:
+            start = datetime.now()    # record start time
+            
+            # run a single iteration
+            update_user_success = run_single(
+                gmail_services, 
+                drive_service, 
+                last_tick=last_tick, 
+                tick_index=tick_index
+            ) 
+            
+            # updating users succeeded - update the last tick to check
+            if update_user_success:
+                last_tick = start
 
-        end = datetime.now()     # record end time
-        run_time = (end - start).seconds
+            end = datetime.now()     # record end time
+            run_time = (end - start).seconds
            
         # failure due to exceeding API use limit 
-        #except APIUseExceededError as e:
-        #    print("API Use exceeded - temporarily pausing")
-        #    time.sleep(defs.PAUSE_TIME)
+        except APIUseExceededError as e:
+            print("API Use exceeded - temporarily pausing")
+            time.sleep(defs.PAUSE_TIME)
 
-        ## any other exception
-        #except BaseException as e:
-        #    print("Failed: {}".format(e))
+        # any other exception
+        except BaseException as e:
+            print("Failed: {}".format(e))
        
         sleep_time = max(0, defs.TICK_TIME - run_time)
         tick_index += 1
