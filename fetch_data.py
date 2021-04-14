@@ -11,7 +11,7 @@ from datetime import datetime
 from pyzipcode import ZipCodeDatabase
 import util
 
-SKIP_LIST = ['safeway', 'riteaid']    # list of pharmacies to skip
+SKIP_LIST = ['safeway', 'riteaid', 'albert']    # list of pharmacies to skip
 
 def fill_coordinates(avail_loc):
     '''helper function writes in the coordinates of a location using the
