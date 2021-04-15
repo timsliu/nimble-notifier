@@ -28,17 +28,9 @@ def fetch_state(state):
     '''fetch the data for a single state'''
     # data for API call 
     api_url = 'https://www.vaccinespotter.org/api/v0/states/{}.json'.format(state)
-    headers = {
-        'if-modified-since': "<DATE_STRING>"
-    }
-
-    # get time and fill in the header
-    now = datetime.utcnow()
-    time_string = now.strftime("%a, %d %B %Y %H:%M:%S GMT")
-    headers['if-modified-since'] = time_string
 
     # make request
-    r = requests.get(api_url, headers=headers)
+    r = requests.get(api_url)
     locations = r.json()
     available = []
     
@@ -77,7 +69,3 @@ def fetch_state(state):
         f.write(json_object)
     return available
 
-if __name__ == "__main__":
-    vaccine_spotter = fetch_vaccine_spotter()
-    vaccine_spotter.fetch()
-        
