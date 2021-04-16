@@ -84,6 +84,7 @@ def format_msg(user):
         avail_locs += "Zip code: {}\n".format(loc['zip'])
         avail_locs += "{}\n".format(loc["url"])
         avail_locs += "Estimated distance: {:.1f} miles\n".format(loc["distance"])
+        avail_locs += "Additional details: {}\n".format(loc["details"])
 
     email_body = email_body.replace("<<appointments>>", avail_locs)
 

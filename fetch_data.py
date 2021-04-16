@@ -24,6 +24,46 @@ def fill_coordinates(avail_loc):
 
     return avail_loc
 
+def fetch_WA():
+    '''fetch data from covidwa'''
+    api_url = "https://api.covidwa.com/v1/get"
+    r = requests.get(api_url)
+    locations = r.json()
+
+    available = []
+
+    for loc in locations["data"]:
+        if loc["Availability"] == "Yes":
+            avail_loc = {} 
+            avail_loc["coordinates"] = [None, None]
+            avail_loc["zip"] = loc["address"][-5:]
+            avail_loc["url"] = loc["url"]
+            avail_loc["name"] = "{} {}".format(
+                loc["name"],
+                loc["address"]
+            )
+            if "restrictions" in loc.keys():
+                avail_loc["details"] = loc["restrictions"]
+            else:
+                avail_loc["details"] = ""
+            
+            try:
+                avail_loc = fill_coordinates(avail_loc)
+            except BaseException as e:
+                continue
+            
+            # add to full list only if there are coordinates
+            if avail_loc["coordinates"][0] is not None:
+                available.append(avail_loc)
+    
+    # convert to json and dump it 
+    json_object = json.dumps(available, indent = 4)
+    with open("data/location/WA_test_location.json", "w") as f:
+        f.write(json_object)
+    
+    return
+
+
 def fetch_state(state):
     '''fetch the data for a single state'''
     # data for API call 
@@ -54,6 +94,7 @@ def fetch_state(state):
                 loc["properties"]["city"],
                 loc["properties"]["address"]
             )
+            avail_loc["details"] = ""
 
             # try to fill in coordinates if they're not available
             avail_loc = fill_coordinates(avail_loc)
@@ -69,3 +110,5 @@ def fetch_state(state):
         f.write(json_object)
     return available
 
+if __name__ == "__main__":
+    fetch_WA()
