@@ -6,11 +6,27 @@ import json
 import os
 from pyzipcode import ZipCodeDatabase
 import random
+from geopy.geocoders import Nominatim
 
-zcdb = ZipCodeDatabase()
+
+def address_to_coors(address):
+    '''converts an address string to lat lon coordiantes. Currently not
+    used due to being really slow'''
+    locator = Nominatim(user_agent = "myGeocoder") 
+  
+    try:
+        location = locator.geocode(address)
+    except BaseException as e:
+        return [None, None]
+    
+    if location is None:
+        return [None, None]
+    
+    return [location.latitude, location.longitude]
 
 def zip_to_coors(zip_code):
     '''helper function converts zip code to lat lon coordinates'''
+    zcdb = ZipCodeDatabase()
 
     try:
         zip_info = zcdb[zip_code]
