@@ -17,7 +17,9 @@ def zip_to_coors(zip_code):
         longitude = zip_info.longitude
         latitude = zip_info.latitude
     except KeyError as e:
-        missing_zips = {94158: [37.771, -122.391]}
+        missing_zips = {94158: [37.771, -122.391],
+                        98391: [47.174, -122.170],
+                        97086: [45.443, -122.513]}
         latitude  = missing_zips[zip_code][0]
         longitude = missing_zips[zip_code][1]
         
