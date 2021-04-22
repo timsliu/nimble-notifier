@@ -34,13 +34,17 @@ def parse_covidwa(locations):
     for loc in locations["data"]:
         if loc["Availability"] == "Yes":
             avail_loc = {} 
-            avail_loc["coordinates"] = [None, None]
-            avail_loc["zip"] = loc["address"][-5:]
-            avail_loc["url"] = loc["url"]
-            avail_loc["name"] = "{} {}".format(
-                loc["name"],
-                loc["address"]
-            )
+            try: 
+                avail_loc["coordinates"] = [None, None]
+                avail_loc["zip"] = loc["address"][-5:]
+                avail_loc["url"] = loc["url"]
+                avail_loc["name"] = "{} {}".format(
+                    loc["name"],
+                    loc["address"]
+                )
+            except KeyError as e:
+                print("Failed to parse covidwa location: {}".format(loc))
+                continue
             
             if "restrictions" in loc.keys():
                 avail_loc["details"] = loc["restrictions"]
