@@ -43,7 +43,6 @@ def parse_covidwa(locations):
                     loc["address"]
                 )
             except KeyError as e:
-                print("Failed to parse covidwa location: {}".format(loc))
                 continue
             
             if "restrictions" in loc.keys():
