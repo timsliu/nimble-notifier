@@ -32,7 +32,7 @@ def parse_covidwa(locations):
     available = []
 
     for loc in locations["data"]:
-        if loc["Availability"] == "Yes":
+        if loc["Availability"] == "Yes" or loc["Availability"] == "Limited":
             avail_loc = {} 
             try: 
                 avail_loc["coordinates"] = [None, None]
